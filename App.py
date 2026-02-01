@@ -70,4 +70,5 @@ if st.button("RUN SCAN"):
     else:
         st.error("Select a vibe first, soldier!")
 # Add this right under st.title("🍸 BAR GIRL")
-st.image("https://raw.githubusercontent.com/suffolkfox/Bar-Girl/main/bargirl_image.jpg")
+st.image("https://raw.githubusercontent.com/suffolkfox/Bar-Girl/main/1769968494770.png
+")
