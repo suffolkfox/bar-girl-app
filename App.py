@@ -69,3 +69,5 @@ if st.button("RUN SCAN"):
         st.markdown(f"### [📍 OPEN COORDINATES]({maps_url})")
     else:
         st.error("Select a vibe first, soldier!")
+# Add this right under st.title("🍸 BAR GIRL")
+st.image("https://raw.githubusercontent.com/suffolkfox/Bar-Girl/main/bargirl_image.jpg")
