@@ -1,6 +1,6 @@
 import streamlit as st
 
-# --- 1. CONFIG & HUD STYLING ---
+# --- 1. CONFIG & STYLING ---
 st.set_page_config(page_title="Bar Girl App", page_icon="🍸", layout="centered")
 
 st.markdown("""
@@ -16,7 +16,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. INTELLIGENCE (XP & LEVELS) ---
+# --- 2. SESSION STATE ---
 if 'xp' not in st.session_state: st.session_state.xp = 0
 if 'level' not in st.session_state: st.session_state.level = 1
 if 'vibe_choice' not in st.session_state: st.session_state.vibe_choice = "-- Select --"
@@ -28,60 +28,65 @@ def gain_xp():
         st.session_state.xp = 0
         st.balloons()
 
-# --- 3. SIDEBAR RADAR ---
+# --- 3. SIDEBAR HUD ---
 st.sidebar.title("🪖 TACTICAL HUD")
 st.sidebar.subheader(f"RANK: LEVEL {st.session_state.level}")
 st.sidebar.progress(st.session_state.xp / 100)
-st.sidebar.write(f"1. **SuffolkFox** (Level {st.session_state.level})")
-st.sidebar.write("2. **Angela** (Level 1)")
+st.sidebar.write(f"1. **SuffolkFox** (Lvl {st.session_state.level})")
+st.sidebar.write("2. **Angela** (Lvl 1)")
 
-# --- 4. DYNAMIC VISUALS SECTION ---
+# --- 4. DYNAMIC VISUALS ---
 st.title("🍸 BAR GIRL")
 
-# This logic checks your status and displays the correct photo
 if st.session_state.level >= 10:
-    img_file = "victory.png"
-    caption_text = "TACTICAL LEGEND: Level 10 Achieved!"
+    img_file, caption_text = "victory.png", "TACTICAL LEGEND: Level 10 Achieved!"
 elif st.session_state.vibe_choice == "A Nice Beer 🍺":
-    img_file = "beer_review.png"
-    caption_text = "Analyzing hop profiles and brew quality..."
+    img_file, caption_text = "beer_review.png", "Analyzing hop profiles..."
 else:
-    img_file = "1769968494770.png"
-    caption_text = "Bar Girl: 'Awaiting your command, soldier.'"
+    img_file, caption_text = "1769968494770.png", "Bar Girl: 'Ready for deployment.'"
 
 try:
     st.image(img_file, caption=caption_text, use_container_width=True)
-except Exception as e:
-    st.error(f"⚠️ Deployment Error: Please ensure '{img_file}' is uploaded to GitHub.")
+except:
+    st.error(f"⚠️ Deployment Error: Ensure '{img_file}' is on GitHub.")
 
-# --- 5. THE MISSION SELECTOR ---
+# --- 5. SEARCH & SCOUT LOGIC ---
+mode = st.radio("MISSION TYPE:", ["Local Recon (Near Me)", "Scout Ahead (New City)"])
+
+target_city = ""
+if mode == "Scout Ahead (New City)":
+    target_city = st.text_input("ENTER TARGET CITY:", placeholder="e.g. London, Tokyo, Peterborough...")
+
 st.session_state.vibe_choice = st.selectbox("CHOOSE YOUR VIBE:", ["-- Select --", "A Nice Beer 🍺", "Fancy Cocktails 🍹", "Good Pub Food 🍔"])
 
-# Special Pint Review Logic
-if st.session_state.vibe_choice == "A Nice Beer 🍺":
-    st.markdown("### 📋 TACTICAL PINT LOG")
-    notes = st.text_area("Observations (Head, Taste, Coldness):", placeholder="Mission notes...")
-    rating = st.slider("Tactical Star Rating:", 1.0, 5.0, 4.5)
-    
-    if st.button("LOG MISSION & SCOUT NEARBY"):
-        gain_xp()
-        st.success(f"Log Confirmed! XP awarded. Tracking beer spots...")
-        st.markdown(f"### [📍 VIEW MAP](https://www.google.com/maps/search/craft+beer+near+me)")
-        # No rerun here to keep the notes visible for a second
-
-elif st.button("RUN SCAN"):
+# Search Function
+def run_tactical_scan():
     if st.session_state.vibe_choice != "-- Select --":
         gain_xp()
-        query = st.session_state.vibe_choice.replace(" ", "+")
-        st.markdown(f"### [📍 OPEN COORDINATES](https://www.google.com/maps/search/{query}+near+me)")
+        keywords = {"A Nice Beer 🍺": "craft+beer+pub", "Fancy Cocktails 🍹": "cocktail+bar", "Good Pub Food 🍔": "gastropub+food"}
+        query = keywords[st.session_state.vibe_choice]
+        
+        location = f"in+{target_city.replace(' ', '+')}" if target_city else "near+me"
+        maps_url = f"https://www.google.com/maps/search/{query}+{location}"
+        
+        st.success(f"Target Acquired! +25 XP")
+        st.markdown(f"### [📍 OPEN COORDINATES]({maps_url})")
     else:
-        st.error("Select a vibe before scanning!")
+        st.error("Select a vibe first!")
 
-# --- 6. EMERGENCY EXTRACTION ---
+# PINT REVIEW UI
+if st.session_state.vibe_choice == "A Nice Beer 🍺":
+    st.markdown("### 📋 TACTICAL PINT LOG")
+    st.text_area("Observations:", placeholder="How's the brew?")
+    st.slider("Rating:", 1.0, 5.0, 4.5)
+    if st.button("LOG MISSION & RUN SCAN"):
+        run_tactical_scan()
+else:
+    if st.button("RUN SCAN"):
+        run_tactical_scan()
+
+# --- 6. EXTRACTION ---
 st.markdown("---")
 if st.button("🚨 REQUEST EXTRACTION"):
-    st.error("📡 DISTRESS SIGNAL SENT... EVAC TEAM NOTIFIED.")
+    st.error("📡 DISTRESS SIGNAL SENT...")
     st.markdown("### [🛸 CLICK FOR UBER](https://m.uber.com/ul/?action=setPickup&pickup=my_location)")
-    st.write("📞 **Local Backup:** 01733 123456 (Peterborough Cars)")
-
-st.caption("Bar Girl Global Tactical Ops © 2026")
